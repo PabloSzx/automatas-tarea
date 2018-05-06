@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-import "semantic-ui-css/semantic.min.css";
-import "./App.css";
 import { map } from "lodash";
 import { Grid, Form, Input, List, Icon, Checkbox } from "semantic-ui-react";
 import styled from "styled-components";
@@ -57,6 +55,10 @@ export default class App extends Component {
     } = this.state;
     return (
       <FormInput>
+        <datalist id="states">
+          {map(states, (value, key) => <option value={key} />)}
+        </datalist>
+
         <Grid columns={2}>
           <Column width={13}>
             <Grid centered>
@@ -66,6 +68,7 @@ export default class App extends Component {
                     className="transition"
                     name="transition_state"
                     type="text"
+                    list="states"
                     value={transition_state}
                     placeholder="Estado actual de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
@@ -91,6 +94,7 @@ export default class App extends Component {
                     name="transition_state_to"
                     className="transition"
                     type="text"
+                    list="states"
                     value={transition_state_to}
                     placeholder="Estado objetivo de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
@@ -127,12 +131,7 @@ export default class App extends Component {
                         trans[transition_state_to] = true;
                       }
 
-                      this.setState({
-                        states: {
-                          ...states,
-                          ...trans
-                        }
-                      });
+                      this.setState({ states: { ...states, ...trans } });
                     }}
                   />
                 </Row>
@@ -146,9 +145,6 @@ export default class App extends Component {
                     placeholder="Estado Inicial"
                     onChange={event => this.handleChange(event)}
                   />
-                  <datalist id="states">
-                    {map(states, (value, key) => <option value={key} />)}
-                  </datalist>
                 </Row>
 
                 <Row>
@@ -180,9 +176,6 @@ export default class App extends Component {
                       placeholder="Estado Final"
                       onChange={event => this.handleChange(event)}
                     />
-                    <datalist id="states">
-                      {map(states, (value, key) => <option value={key} />)}
-                    </datalist>
                   </Row>
                 ) : (
                   <Row />
