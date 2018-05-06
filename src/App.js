@@ -10,10 +10,12 @@ const FormInput = styled.div`
 `;
 
 class Transition {
-  constructor(state, word, stack) {
+  constructor(state, word, stack, state_to, stack_to) {
     this.state = state;
     this.word = word;
     this.stack = stack;
+    this.state_to = state_to;
+    this.stack_to = stack_to;
   }
 }
 
@@ -44,6 +46,8 @@ export default class App extends Component {
       transition_state,
       transition_word,
       transition_stack,
+      transition_state_to,
+      transition_stack_to,
       transitionsList,
       initial,
       endCondition,
@@ -59,6 +63,7 @@ export default class App extends Component {
               <Form>
                 <Row>
                   <Input
+                    className="transition"
                     name="transition_state"
                     type="text"
                     value={transition_state}
@@ -67,6 +72,7 @@ export default class App extends Component {
                   />
                   <Input
                     name="transition_word"
+                    className="transition"
                     type="text"
                     value={transition_word}
                     placeholder="Subpalabra que falta por leer de la transicion a añadir"
@@ -74,11 +80,30 @@ export default class App extends Component {
                   />
                   <Input
                     name="transition_stack"
+                    className="transition"
                     type="text"
                     value={transition_stack}
                     placeholder="Contenido del stack de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
                   />
+                  <Icon name="arrow right" />
+                  <Input
+                    name="transition_state_to"
+                    className="transition"
+                    type="text"
+                    value={transition_state_to}
+                    placeholder="Estado objetivo de la transicion a añadir"
+                    onChange={event => this.handleChange(event)}
+                  />
+                  <Input
+                    name="transition_stack_to"
+                    className="transition"
+                    type="text"
+                    value={transition_stack_to}
+                    placeholder="Reemplazo de contenido del stack de la transicion a añadir"
+                    onChange={event => this.handleChange(event)}
+                  />
+
                   <Icon
                     name="add"
                     onClick={event => {
@@ -88,15 +113,26 @@ export default class App extends Component {
                           new Transition(
                             transition_state,
                             transition_word,
-                            transition_stack
+                            transition_stack,
+                            transition_state_to,
+                            transition_stack_to
                           )
                         ]
                       });
+                      const trans = {};
                       if (!states[transition_state]) {
-                        this.setState({
-                          states: { ...states, [transition_state]: true }
-                        });
+                        trans[transition_state] = true;
                       }
+                      if (!states[transition_state_to]) {
+                        trans[transition_state_to] = true;
+                      }
+
+                      this.setState({
+                        states: {
+                          ...states,
+                          ...trans
+                        }
+                      });
                     }}
                   />
                 </Row>
@@ -168,8 +204,11 @@ export default class App extends Component {
           <Column width={3}>
             <List bulleted>
               {transitionsList.map((value, key) => {
-                const { state, word, stack } = value;
-                return <Item>{`𝛿(${state}, ${word}, ${stack})`}</Item>;
+                const { state, word, stack, state_to, stack_to } = value;
+                return (
+                  <Item
+                  >{`𝛿(${state}, ${word}, ${stack}) = 𝛿(${state_to}, ${stack_to})`}</Item>
+                );
               })}
             </List>
           </Column>
