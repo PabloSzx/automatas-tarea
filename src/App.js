@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { map } from "lodash";
 import { Grid, Form, Input, List, Icon, Checkbox } from "semantic-ui-react";
 import styled from "styled-components";
+import { stack } from "datastructures-js";
 
 const FormInput = styled.div`
   margin-top: 10vh;
@@ -45,7 +46,6 @@ export default class App extends Component {
     });
   }
   render() {
-    console.log(this.state);
     const { Row, Column } = Grid;
     const { Item } = List;
 
