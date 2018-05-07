@@ -17,6 +17,14 @@ class Transition {
   }
 }
 
+class Word {
+  constructor(word, pending = true, accepted = false) {
+    this.word = word;
+    this.accepted = accepted;
+    this.pending = pending;
+  }
+}
+
 export default class App extends Component {
   constructor(props) {
     super(props);
@@ -26,6 +34,7 @@ export default class App extends Component {
       initial: "",
       endCondition: "",
       endState: "",
+      inputList: [],
       input: "",
       states: {}
     };
@@ -50,6 +59,7 @@ export default class App extends Component {
       initial,
       endCondition,
       endState,
+      inputList,
       input,
       states
     } = this.state;
@@ -63,7 +73,7 @@ export default class App extends Component {
           <Column width={13}>
             <Grid centered>
               <Form>
-                <Row>
+                <Row verticalAlign="middle">
                   <Input
                     className="transition"
                     name="transition_state"
@@ -110,6 +120,7 @@ export default class App extends Component {
 
                   <Icon
                     name="add"
+                    className="iconButton"
                     onClick={event => {
                       this.setState({
                         transitionsList: [
@@ -181,13 +192,25 @@ export default class App extends Component {
                   <Row />
                 )}
 
-                <Row>
+                <Row verticalAlign="end">
                   <Input
                     name="input"
                     type="text"
                     value={input}
                     placeholder="Palabra de entrada"
                     onChange={event => this.handleChange(event)}
+                  />
+                  <Icon
+                    name="add"
+                    className="iconButton"
+                    onClick={event =>
+                      input
+                        ? this.setState({
+                            input: "",
+                            inputList: [...inputList, new Word(input)]
+                          })
+                        : window.$toast("Ingrese una palabra valida")
+                    }
                   />
                 </Row>
               </Form>
@@ -205,6 +228,26 @@ export default class App extends Component {
               })}
             </List>
           </Column>
+        </Grid>
+
+        <Grid stretched columns={1} centered>
+          <List>
+            {inputList.map((value, key) => {
+              const { word, accepted, pending } = value;
+
+              return (
+                <Row>
+                  <Item key={key}>
+                    {`${word}`}
+                    <Icon
+                      name={pending ? "refresh" : accepted ? "check" : "x"}
+                      loading={pending}
+                    />
+                  </Item>
+                </Row>
+              );
+            })}
+          </List>
         </Grid>
       </FormInput>
     );
