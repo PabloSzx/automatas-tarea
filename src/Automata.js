@@ -16,7 +16,14 @@ export default class Automata {
 
     this.transitions = {};
 
+    this.stack = stack();
+    this.stack.push("R");
+    this.currentState = initialState;
+    this.endState = endState;
+    this.word = queue();
+
     forEach(transitions, (value, key) => {
+      /* Iteramos sobre la lista de transiciones */
       const { state, letter, stack_from, state_to, stack_to } = value;
 
       if (!this.alfabetoDeEntrada[letter]) {
@@ -27,14 +34,18 @@ export default class Automata {
       }
       if (!this.alfabetoDeStack[stack_to]) {
         this.alfabetoDeStack[stack_to] = true;
-      }
+      } /* Definicion de alfabeto de entrada, alfabeto de stack y alfabeto de states */
 
       if (this.transitions[state]) {
         if (this.transitions[state][stack_from]) {
+          /* Es transitions[state][stack][stack_from] undefined?? */
           this.transitions = {
             ...this.transitions,
+            /* Lo que tenia antes la lista de transiciones */
             [state]: {
-              ...this.transitions[state],
+              ...this.transitions[
+                state
+              ] /* Lo que teniamos antes en transitions[state][state][stack_from] mas la nueva direccion; Buscamos un Merge, no un Replace */,
               [stack_from]: {
                 ...this.transitions[state][stack_from],
                 [letter]: { state_to, stack_to }
@@ -42,10 +53,13 @@ export default class Automata {
             }
           };
         } else {
+          /* Es transitions[state][stack] undefined?? */
           this.transitions = {
             ...this.transitions,
             [state]: {
-              ...this.transitions[state],
+              ...this.transitions[
+                state
+              ] /* Lo que teniamos antes en transitions[state] mas la nueva direccion; Buscamos un Merge, no un Replace */,
               [stack_from]: {
                 [letter]: { state_to, stack_to }
               }
@@ -53,21 +67,19 @@ export default class Automata {
           };
         }
       } else {
+        /* Es transitions[state] undefined?? */
         this.transitions = {
-          ...this.transitions,
+          /* Por que elegimos esta estructura? porque es del orden O(1) */
+          ...this.transitions /* Lo que haya antes en this.transitions */,
           [state]: {
+            /* Mas una nueva direccion en this.transitions */
             [stack_from]: {
               [letter]: { state_to, stack_to }
             }
           }
         };
       }
-    });
-    this.stack = stack();
-    this.stack.push("R");
-    this.currentState = initialState;
-    this.endState = endState;
-    this.word = queue();
+    }); /* Que no se pierda informacion */
   }
 
   reverseString(str) {
@@ -82,8 +94,6 @@ export default class Automata {
     for (const c of this.reverseString(stack_to)) {
       this.stack.push(c);
     }
-
-    console.log("stack va en: ", this.stack);
   }
 
   analizarPalabra(word) {
@@ -92,7 +102,11 @@ export default class Automata {
     }
 
     while (
-      this.endState ? this.currentState !== this.endState : !this.word.isEmpty()
+      this.endState /* Existe endState */
+        ? this.currentState !==
+          this
+            .endState /* Si existe endState, la condicion del while es si currentState es distinto de endState */
+        : !this.word.isEmpty() /* Si no existe endState, la condicion del while es si se acabo la palabra */
     ) {
       const c = this.word.dequeue();
       if (
@@ -106,18 +120,17 @@ export default class Automata {
         this.currentState = state_to;
         this.replaceStack(stack_to);
       } else {
-        console.log(
-          "c: ",
-          c,
-          " currentState: ",
-          this.currentState,
-          " stackPeek:",
-          this.stack.peek()
-        );
         return false;
       }
     }
 
-    return true;
+    if (
+      this.endState
+        ? this.currentState === this.endState
+        : this.stack.isEmpty() || this.stack.peek() === "ε"
+    ) {
+      return true;
+    }
+    return false;
   }
 }

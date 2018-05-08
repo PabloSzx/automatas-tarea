@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { map } from "lodash";
+import { map, filter } from "lodash";
 import { Grid, Form, Input, List, Icon, Checkbox } from "semantic-ui-react";
 import styled from "styled-components";
 
@@ -10,14 +10,14 @@ const FormInput = styled.div`
 `;
 
 class Transition {
-  constructor(state, letter, stack, state_to, stack_to) {
+  constructor(state, letter, stack_from, state_to, stack_to) {
     this.state = state;
     if (letter === "") {
       this.letter = "ε";
     } else {
       this.letter = letter;
     }
-    this.stack_from = stack;
+    this.stack_from = stack_from;
     this.state_to = state_to;
     if (stack_to === "") {
       this.stack_to = "ε";
@@ -40,6 +40,11 @@ export default class App extends Component {
     super(props);
 
     this.state = {
+      transition_state: "",
+      transition_letter: "",
+      transition_stack: "",
+      transition_state_to: "",
+      transition_stack_to: "",
       transitionsList: [],
       initialState: "",
       endCondition: "",
@@ -70,9 +75,31 @@ export default class App extends Component {
         case 4:
           this.addTransition();
           return;
+        case 5:
+          this.addWord();
+          return;
         default:
           return;
       }
+    }
+  }
+
+  async addWord() {
+    let valid = await this.updateAutomata();
+
+    if (valid) {
+      const { input, automata, inputList } = this.state;
+
+      this.setState({
+        /* Actualiza mi informacion dentro de la pagina y renderiza */
+        input: "",
+        inputList: [
+          ...inputList,
+          new Word(input, false, automata.analizarPalabra(input + "ε"))
+        ]
+      });
+
+      this.word_input.focus();
     }
   }
 
@@ -87,47 +114,115 @@ export default class App extends Component {
       states
     } = this.state;
 
-    this.setState({
-      transitionsList: [
-        ...transitionsList,
-        new Transition(
-          transition_state,
-          transition_letter,
-          transition_stack,
-          transition_state_to,
-          transition_stack_to
-        )
-      ]
-    });
-    const trans = {};
-    if (!states[transition_state]) {
-      trans[transition_state] = true;
+    if (
+      transition_state.length >= 1 &&
+      transition_state_to.length >= 1 &&
+      transition_letter.length <= 1 &&
+      transition_stack.length <= 1
+    ) {
+      this.setState({
+        transitionsList: [
+          /* La nueva lista de transiciones constara de la lista anterior mas la nueva transicion */
+          ...transitionsList,
+          new Transition(
+            transition_state,
+            transition_letter,
+            transition_stack,
+            transition_state_to,
+            transition_stack_to
+          )
+        ]
+      });
+
+      const trans = {};
+      if (!states[transition_state]) {
+        trans[transition_state] = true;
+      }
+      if (!states[transition_state_to]) {
+        trans[transition_state_to] = true;
+      }
+
+      this.setState({
+        /* Actualiza el alfabeto de estados (si es necesario), y limpia los input ocupados */
+        states: {
+          ...states,
+          ...trans
+        },
+        transition_state: "",
+        transition_letter: "",
+        transition_stack: "",
+        transition_state_to: "",
+        transition_stack_to: ""
+      });
+      this.transition_state.focus(); /* Hacele focus al Estado actual de la nueva transicion */
+
+      this.updateAutomata();
+    } else {
+      window.$toast(
+        "ERROR! La letra y stack que se esperan, son maximo 1 caracter cada uno"
+      );
     }
-    if (!states[transition_state_to]) {
-      trans[transition_state_to] = true;
+  }
+
+  removeTransition(index) {
+    const { transitionsList } = this.state;
+    this.setState({
+      /* Actualiza la nueva lista de transiciones quitando la transicion indicada presionando la X */
+      transitionsList: filter(
+        transitionsList,
+        (value, key) => key !== index
+      ) /* Itera sobre transisionsList, si el indice del arreglo coincide con el indice de la transicion que se quiere eliminar, la quitamos */
+    });
+  }
+
+  async updateAutomata() {
+    const {
+      transitionsList,
+      states,
+      initialState,
+      endState,
+      endCondition
+    } = this.state;
+
+    let valid = false;
+    if (initialState.length >= 1) {
+      //INITIAL STATE TIENE QUE SER MAYOR IGUAL A UNO
+      if (endCondition === "state") {
+        //SI END CONDITION ES DE STATE, TIENE QUE SER MAYOR IGUAL A UNO
+        if (endState.length >= 1) {
+          valid = true;
+        }
+      } else {
+        valid = true;
+      }
     }
 
-    this.setState({
-      states: {
-        ...states,
-        ...trans
-      },
-      transition_state: "",
-      transition_letter: "",
-      transition_stack: "",
-      transition_state_to: "",
-      transition_stack_to: ""
-    });
-    this.transition_state.focus();
+    if (valid) {
+      const automata = new Automata(
+        transitionsList,
+        states,
+        initialState,
+        endState
+      );
+      await this.setState({
+        automata
+      });
+
+      return true;
+    } else {
+      window.$toast("Verifique los valores de estado inicial y/o final");
+    }
+    return false;
+    /* Actualiza el automata con los nuevos datos ingresados, casi tiempo real */
   }
 
   handleChange(event) {
-    const { transitionsList, states, initialState, endState } = this.state;
+    /* Function auxiliar para recibir cambios en los input */
     this.setState({
-      [event.target.name]: event.target.value,
-      automata: new Automata(transitionsList, states, initialState, endState)
+      [event.target.name]: event.target.value
     });
   }
+
   render() {
     const { Row, Column } = Grid;
     const { Item } = List;
@@ -144,10 +239,10 @@ export default class App extends Component {
       endState,
       inputList,
       input,
-      states,
-      automata
-    } = this.state;
+      states
+    } = this.state; /* Todas las variables de this.state que nos van a servir en la renderizacion */
     return (
+      /* JSX PAPU */
       <FormInput>
         <datalist id="states">
           {map(states, (value, key) => <option value={key} />)}
@@ -277,23 +372,16 @@ export default class App extends Component {
                     value={input}
                     placeholder="Palabra de entrada"
                     onChange={event => this.handleChange(event)}
+                    ref={input => (this.word_input = input)}
+                    onKeyPress={event => this.handleKeyPress(event)}
+                    onFocus={() => this.setState({ transition_input_focus: 5 })}
                   />
                   <Icon
                     name="add"
                     className="iconButton"
                     onClick={event => {
                       input
-                        ? this.setState({
-                            input: "",
-                            inputList: [
-                              ...inputList,
-                              new Word(
-                                input,
-                                false,
-                                automata.analizarPalabra(input + "ε")
-                              )
-                            ]
-                          })
+                        ? this.addWord()
                         : window.$toast("Ingrese una palabra valida");
                     }}
                   />
@@ -304,11 +392,21 @@ export default class App extends Component {
 
           <Column width={3}>
             <List bulleted>
-              {transitionsList.map((value, key) => {
+              {map(transitionsList, (value, key) => {
                 const { state, letter, stack_from, state_to, stack_to } = value;
                 return (
-                  <Item
-                  >{`𝛿(${state}, ${letter}, ${stack_from}) = 𝛿(${state_to}, ${stack_to})`}</Item>
+                  <Item>
+                    {`𝛿(${state}, ${letter}, ${
+                      stack_from === "" ? "ε" : stack_from
+                    }) = 𝛿(${state_to}, ${stack_to})`}
+                    <Icon
+                      name="remove"
+                      className="iconButton"
+                      onClick={() => {
+                        this.removeTransition(key);
+                      }}
+                    />
+                  </Item>
                 );
               })}
             </List>
@@ -317,13 +415,13 @@ export default class App extends Component {
 
         <Grid stretched columns={1} centered>
           <List>
-            {inputList.map((value, key) => {
+            {map(inputList, (value, key) => {
               const { word, accepted, pending } = value;
 
               return (
                 <Row>
                   <Item key={key}>
-                    {`${word}`}
+                    {`${word.replace("ε", "")}`}
                     <Icon
                       name={pending ? "refresh" : accepted ? "check" : "x"}
                       loading={pending}
