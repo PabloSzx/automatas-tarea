@@ -6,8 +6,6 @@ import "./dist/verysmalltoast.css";
 import "./App.css";
 import "very-small-toast";
 
-import registerServiceWorker from "./registerServiceWorker";
-
 const rootEl = document.getElementById("root");
 ReactDOM.render(<App />, rootEl);
 
@@ -17,4 +15,3 @@ if (module.hot) {
     ReactDOM.render(<NextApp />, rootEl);
   });
 }
-registerServiceWorker();

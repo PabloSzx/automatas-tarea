@@ -1,4 +1,5 @@
-import { stack, queue } from "datastructures-js";
+import Stack from "stackjs";
+import Queue from "queue-fifo";
 import { forEach } from "lodash";
 
 export default class Automata {
@@ -16,11 +17,11 @@ export default class Automata {
 
     this.transitions = {};
 
-    this.stack = stack();
+    this.stack = new Stack();
     this.stack.push("R");
     this.currentState = initialState;
     this.endState = endState;
-    this.word = queue();
+    this.word = new Queue();
 
     forEach(transitions, (value, key) => {
       /* Iteramos sobre la lista de transiciones */
@@ -106,7 +107,8 @@ export default class Automata {
         ? this.currentState !==
           this
             .endState /* Si existe endState, la condicion del while es si currentState es distinto de endState */
-        : !this.word.isEmpty() /* Si no existe endState, la condicion del while es si se acabo la palabra */
+        : !this.word
+            .length /* Si no existe endState, la condicion del while es si se acabo la palabra */
     ) {
       const c = this.word.dequeue();
       if (

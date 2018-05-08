@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "datastructures-js": "^5.3.3",
+    "queue-fifo": "^0.2.4",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-scripts": "1.1.4",
     "semantic-ui-css": "^2.3.1",
     "semantic-ui-react": "^0.80.0",
+    "stackjs": "^0.1.0",
     "styled-components": "^3.2.6",
     "very-small-toast": "^1.0.5"
   },
