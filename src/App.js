@@ -2,25 +2,34 @@ import React, { Component } from "react";
 import { map } from "lodash";
 import { Grid, Form, Input, List, Icon, Checkbox } from "semantic-ui-react";
 import styled from "styled-components";
-import { stack } from "datastructures-js";
+
+import Automata from "./Automata";
 
 const FormInput = styled.div`
   margin-top: 10vh;
 `;
 
 class Transition {
-  constructor(state, word, stack, state_to, stack_to) {
+  constructor(state, letter, stack, state_to, stack_to) {
     this.state = state;
-    this.word = word;
-    this.stack = stack;
+    if (letter === "") {
+      this.letter = "ε";
+    } else {
+      this.letter = letter;
+    }
+    this.stack_from = stack;
     this.state_to = state_to;
-    this.stack_to = stack_to;
+    if (stack_to === "") {
+      this.stack_to = "ε";
+    } else {
+      this.stack_to = stack_to;
+    }
   }
 }
 
 class Word {
   constructor(word, pending = true, accepted = false) {
-    this.word = word;
+    this.word = "ε" + word;
     this.accepted = accepted;
     this.pending = pending;
   }
@@ -32,17 +41,91 @@ export default class App extends Component {
 
     this.state = {
       transitionsList: [],
-      initial: "",
+      initialState: "",
       endCondition: "",
       endState: "",
       inputList: [],
       input: "",
-      states: {}
+      states: {},
+      automata: new Automata(),
+      transition_input_focus: 0
     };
   }
-  handleChange(event) {
+
+  handleKeyPress(event) {
+    if (event.key === "Enter") {
+      switch (this.state.transition_input_focus) {
+        case 0:
+          this.transition_letter.focus();
+          return;
+        case 1:
+          this.transition_stack.focus();
+          return;
+        case 2:
+          this.transition_state_to.focus();
+          return;
+        case 3:
+          this.transition_stack_to.focus();
+          return;
+        case 4:
+          this.addTransition();
+          return;
+        default:
+          return;
+      }
+    }
+  }
+
+  addTransition() {
+    const {
+      transition_state,
+      transition_letter,
+      transition_stack,
+      transition_state_to,
+      transition_stack_to,
+      transitionsList,
+      states
+    } = this.state;
+
     this.setState({
-      [event.target.name]: event.target.value
+      transitionsList: [
+        ...transitionsList,
+        new Transition(
+          transition_state,
+          transition_letter,
+          transition_stack,
+          transition_state_to,
+          transition_stack_to
+        )
+      ]
+    });
+    const trans = {};
+    if (!states[transition_state]) {
+      trans[transition_state] = true;
+    }
+    if (!states[transition_state_to]) {
+      trans[transition_state_to] = true;
+    }
+
+    this.setState({
+      states: {
+        ...states,
+        ...trans
+      },
+      transition_state: "",
+      transition_letter: "",
+      transition_stack: "",
+      transition_state_to: "",
+      transition_stack_to: ""
+    });
+    this.transition_state.focus();
+  }
+
+  handleChange(event) {
+    const { transitionsList, states, initialState, endState } = this.state;
+    this.setState({
+      [event.target.name]: event.target.value,
+      automata: new Automata(transitionsList, states, initialState, endState)
     });
   }
   render() {
@@ -51,17 +134,18 @@ export default class App extends Component {
 
     const {
       transition_state,
-      transition_word,
+      transition_letter,
       transition_stack,
       transition_state_to,
       transition_stack_to,
       transitionsList,
-      initial,
+      initialState,
       endCondition,
       endState,
       inputList,
       input,
-      states
+      states,
+      automata
     } = this.state;
     return (
       <FormInput>
@@ -82,14 +166,20 @@ export default class App extends Component {
                     value={transition_state}
                     placeholder="Estado actual de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
+                    ref={input => (this.transition_state = input)}
+                    onFocus={() => this.setState({ transition_input_focus: 0 })}
+                    onKeyPress={event => this.handleKeyPress(event)}
                   />
                   <Input
-                    name="transition_word"
+                    name="transition_letter"
                     className="transition"
                     type="text"
-                    value={transition_word}
+                    value={transition_letter}
                     placeholder="Subpalabra que falta por leer de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
+                    ref={input => (this.transition_letter = input)}
+                    onFocus={() => this.setState({ transition_input_focus: 1 })}
+                    onKeyPress={event => this.handleKeyPress(event)}
                   />
                   <Input
                     name="transition_stack"
@@ -98,6 +188,9 @@ export default class App extends Component {
                     value={transition_stack}
                     placeholder="Contenido del stack de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
+                    ref={input => (this.transition_stack = input)}
+                    onFocus={() => this.setState({ transition_input_focus: 2 })}
+                    onKeyPress={event => this.handleKeyPress(event)}
                   />
                   <Icon name="arrow right" />
                   <Input
@@ -108,6 +201,9 @@ export default class App extends Component {
                     value={transition_state_to}
                     placeholder="Estado objetivo de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
+                    ref={input => (this.transition_state_to = input)}
+                    onFocus={() => this.setState({ transition_input_focus: 3 })}
+                    onKeyPress={event => this.handleKeyPress(event)}
                   />
                   <Input
                     name="transition_stack_to"
@@ -116,43 +212,25 @@ export default class App extends Component {
                     value={transition_stack_to}
                     placeholder="Reemplazo de contenido del stack de la transicion a añadir"
                     onChange={event => this.handleChange(event)}
+                    ref={input => (this.transition_stack_to = input)}
+                    onFocus={() => this.setState({ transition_input_focus: 4 })}
+                    onKeyPress={event => this.handleKeyPress(event)}
                   />
 
                   <Icon
                     name="add"
                     className="iconButton"
-                    onClick={event => {
-                      this.setState({
-                        transitionsList: [
-                          ...transitionsList,
-                          new Transition(
-                            transition_state,
-                            transition_word,
-                            transition_stack,
-                            transition_state_to,
-                            transition_stack_to
-                          )
-                        ]
-                      });
-                      const trans = {};
-                      if (!states[transition_state]) {
-                        trans[transition_state] = true;
-                      }
-                      if (!states[transition_state_to]) {
-                        trans[transition_state_to] = true;
-                      }
-
-                      this.setState({ states: { ...states, ...trans } });
-                    }}
+                    ref={input => (this.transition_add = input)}
+                    onClick={event => this.addTransition()}
                   />
                 </Row>
 
                 <Row>
                   <Input
-                    name="initial"
+                    name="initialState"
                     type="text"
                     list="states"
-                    value={initial}
+                    value={initialState}
                     placeholder="Estado Inicial"
                     onChange={event => this.handleChange(event)}
                   />
@@ -192,7 +270,7 @@ export default class App extends Component {
                   <Row />
                 )}
 
-                <Row verticalAlign="end">
+                <Row verticalAlign="middle">
                   <Input
                     name="input"
                     type="text"
@@ -203,14 +281,21 @@ export default class App extends Component {
                   <Icon
                     name="add"
                     className="iconButton"
-                    onClick={event =>
+                    onClick={event => {
                       input
                         ? this.setState({
                             input: "",
-                            inputList: [...inputList, new Word(input)]
+                            inputList: [
+                              ...inputList,
+                              new Word(
+                                input,
+                                false,
+                                automata.analizarPalabra(input + "ε")
+                              )
+                            ]
                           })
-                        : window.$toast("Ingrese una palabra valida")
-                    }
+                        : window.$toast("Ingrese una palabra valida");
+                    }}
                   />
                 </Row>
               </Form>
@@ -220,10 +305,10 @@ export default class App extends Component {
           <Column width={3}>
             <List bulleted>
               {transitionsList.map((value, key) => {
-                const { state, word, stack, state_to, stack_to } = value;
+                const { state, letter, stack_from, state_to, stack_to } = value;
                 return (
                   <Item
-                  >{`𝛿(${state}, ${word}, ${stack}) = 𝛿(${state_to}, ${stack_to})`}</Item>
+                  >{`𝛿(${state}, ${letter}, ${stack_from}) = 𝛿(${state_to}, ${stack_to})`}</Item>
                 );
               })}
             </List>
