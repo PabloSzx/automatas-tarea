@@ -1,6 +1,6 @@
 import Stack from "stackjs";
 import Queue from "queue-fifo";
-import { forEach } from "lodash";
+import { forEach, merge } from "lodash";
 
 export default class Automata {
   constructor(
@@ -37,50 +37,15 @@ export default class Automata {
         this.alfabetoDeStack[stack_to] = true;
       } /* Definicion de alfabeto de entrada, alfabeto de stack y alfabeto de states */
 
-      if (this.transitions[state]) {
-        if (this.transitions[state][stack_from]) {
-          /* Es transitions[state][stack][stack_from] undefined?? */
-          this.transitions = {
-            ...this.transitions,
-            /* Lo que tenia antes la lista de transiciones */
-            [state]: {
-              ...this.transitions[
-                state
-              ] /* Lo que teniamos antes en transitions[state][state][stack_from] mas la nueva direccion; Buscamos un Merge, no un Replace */,
-              [stack_from]: {
-                ...this.transitions[state][stack_from],
-                [letter]: { state_to, stack_to }
-              }
-            }
-          };
-        } else {
-          /* Es transitions[state][stack] undefined?? */
-          this.transitions = {
-            ...this.transitions,
-            [state]: {
-              ...this.transitions[
-                state
-              ] /* Lo que teniamos antes en transitions[state] mas la nueva direccion; Buscamos un Merge, no un Replace */,
-              [stack_from]: {
-                [letter]: { state_to, stack_to }
-              }
-            }
-          };
-        }
-      } else {
-        /* Es transitions[state] undefined?? */
-        this.transitions = {
-          /* Por que elegimos esta estructura? porque es del orden O(1) */
-          ...this.transitions /* Lo que haya antes en this.transitions */,
-          [state]: {
-            /* Mas una nueva direccion en this.transitions */
-            [stack_from]: {
-              [letter]: { state_to, stack_to }
-            }
+      merge(this.transitions, {
+        [state]: {
+          /* Se une lo que se tenia antes en transiciones mas la nueva transicion */
+          [stack_from]: {
+            [letter]: { state_to, stack_to }
           }
-        };
-      }
-    }); /* Que no se pierda informacion */
+        }
+      });
+    });
   }
 
   reverseString(str) {
