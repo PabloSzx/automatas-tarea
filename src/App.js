@@ -1,12 +1,21 @@
 import React, { Component } from "react";
 import { map, filter } from "lodash";
-import { Grid, Form, Input, List, Icon, Checkbox } from "semantic-ui-react";
+import {
+  Grid,
+  Form,
+  Input,
+  List,
+  Icon,
+  Checkbox,
+  Divider
+} from "semantic-ui-react";
 import styled from "styled-components";
 
 import Automata from "./Automata";
 
 const FormInput = styled.div`
   margin-top: 10vh;
+  width: 100vw;
 `;
 
 class Transition {
@@ -185,7 +194,7 @@ export default class App extends Component {
     } = this.state;
 
     let valid = false;
-    if (initialState.length >= 1) {
+    if (initialState.length >= 1 && endCondition !== "") {
       //INITIAL STATE TIENE QUE SER MAYOR IGUAL A UNO
       if (endCondition === "state") {
         //SI END CONDITION ES DE STATE, TIENE QUE SER MAYOR IGUAL A UNO
@@ -242,152 +251,171 @@ export default class App extends Component {
       states
     } = this.state; /* Todas las variables de this.state que nos van a servir en la renderizacion */
     return (
-      /* JSX PAPU */
       <FormInput>
+        <Divider />
         <datalist id="states">
           {map(states, (value, key) => <option value={key} />)}
         </datalist>
 
-        <Grid columns={2}>
+        <Grid columns={3} centered>
           <Column width={13}>
-            <Grid centered>
-              <Form>
-                <Row verticalAlign="middle">
-                  <Input
-                    className="transition"
-                    name="transition_state"
-                    type="text"
-                    list="states"
-                    value={transition_state}
-                    placeholder="Estado actual de la transicion a añadir"
-                    onChange={event => this.handleChange(event)}
-                    ref={input => (this.transition_state = input)}
-                    onFocus={() => this.setState({ transition_input_focus: 0 })}
-                    onKeyPress={event => this.handleKeyPress(event)}
-                  />
-                  <Input
-                    name="transition_letter"
-                    className="transition"
-                    type="text"
-                    value={transition_letter}
-                    placeholder="Subpalabra que falta por leer de la transicion a añadir"
-                    onChange={event => this.handleChange(event)}
-                    ref={input => (this.transition_letter = input)}
-                    onFocus={() => this.setState({ transition_input_focus: 1 })}
-                    onKeyPress={event => this.handleKeyPress(event)}
-                  />
-                  <Input
-                    name="transition_stack"
-                    className="transition"
-                    type="text"
-                    value={transition_stack}
-                    placeholder="Contenido del stack de la transicion a añadir"
-                    onChange={event => this.handleChange(event)}
-                    ref={input => (this.transition_stack = input)}
-                    onFocus={() => this.setState({ transition_input_focus: 2 })}
-                    onKeyPress={event => this.handleKeyPress(event)}
-                  />
-                  <Icon name="arrow right" />
-                  <Input
-                    name="transition_state_to"
-                    className="transition"
-                    type="text"
-                    list="states"
-                    value={transition_state_to}
-                    placeholder="Estado objetivo de la transicion a añadir"
-                    onChange={event => this.handleChange(event)}
-                    ref={input => (this.transition_state_to = input)}
-                    onFocus={() => this.setState({ transition_input_focus: 3 })}
-                    onKeyPress={event => this.handleKeyPress(event)}
-                  />
-                  <Input
-                    name="transition_stack_to"
-                    className="transition"
-                    type="text"
-                    value={transition_stack_to}
-                    placeholder="Reemplazo de contenido del stack de la transicion a añadir"
-                    onChange={event => this.handleChange(event)}
-                    ref={input => (this.transition_stack_to = input)}
-                    onFocus={() => this.setState({ transition_input_focus: 4 })}
-                    onKeyPress={event => this.handleKeyPress(event)}
-                  />
+            <Form>
+              <Row stretched columns={5}>
+                <Input
+                  className="transition"
+                  name="transition_state"
+                  type="text"
+                  list="states"
+                  value={transition_state}
+                  placeholder="q1"
+                  label="Estado actual"
+                  onChange={event => this.handleChange(event)}
+                  ref={input => (this.transition_state = input)}
+                  onFocus={() => this.setState({ transition_input_focus: 0 })}
+                  onKeyPress={event => this.handleKeyPress(event)}
+                />
 
+                <Input
+                  name="transition_letter"
+                  className="transition"
+                  type="text"
+                  value={transition_letter}
+                  placeholder="a"
+                  label="Letra"
+                  onChange={event => this.handleChange(event)}
+                  ref={input => (this.transition_letter = input)}
+                  onFocus={() => this.setState({ transition_input_focus: 1 })}
+                  onKeyPress={event => this.handleKeyPress(event)}
+                />
+
+                <Input
+                  name="transition_stack"
+                  className="transition"
+                  type="text"
+                  value={transition_stack}
+                  placeholder="R"
+                  label="Stack"
+                  onChange={event => this.handleChange(event)}
+                  ref={input => (this.transition_stack = input)}
+                  onFocus={() => this.setState({ transition_input_focus: 2 })}
+                  onKeyPress={event => this.handleKeyPress(event)}
+                />
+                <Row>
+                  <Icon name="arrow circle right" size="normal" />
+                </Row>
+
+                <Input
+                  name="transition_state_to"
+                  className="transition"
+                  type="text"
+                  list="states"
+                  value={transition_state_to}
+                  placeholder="q2"
+                  label="Estado objetivo"
+                  onChange={event => this.handleChange(event)}
+                  ref={input => (this.transition_state_to = input)}
+                  onFocus={() => this.setState({ transition_input_focus: 3 })}
+                  onKeyPress={event => this.handleKeyPress(event)}
+                />
+                <Input
+                  name="transition_stack_to"
+                  className="transition"
+                  type="text"
+                  value={transition_stack_to}
+                  placeholder="AR"
+                  label="Reemplazo stack"
+                  onChange={event => this.handleChange(event)}
+                  ref={input => (this.transition_stack_to = input)}
+                  onFocus={() => this.setState({ transition_input_focus: 4 })}
+                  onKeyPress={event => this.handleKeyPress(event)}
+                />
+                <Row>
                   <Icon
-                    name="add"
+                    name="plus square outline"
+                    size="big"
                     className="iconButton"
                     ref={input => (this.transition_add = input)}
                     onClick={event => this.addTransition()}
                   />
                 </Row>
+              </Row>
+              <Divider />
+              <Row>
+                <Input
+                  name="initialState"
+                  type="text"
+                  list="states"
+                  value={initialState}
+                  placeholder="q1"
+                  label="Estado inicial"
+                  onChange={event => this.handleChange(event)}
+                />
+              </Row>
 
-                <Row>
+              <Row>
+                <Checkbox
+                  radio
+                  label="Aceptar por stack vacio"
+                  value={endCondition}
+                  onClick={() => this.setState({ endCondition: "empty" })}
+                  checked={endCondition === "empty"}
+                />
+
+                <Checkbox
+                  radio
+                  label="Aceptar por estado final"
+                  name="endCondition"
+                  value={endCondition}
+                  onClick={() => this.setState({ endCondition: "state" })}
+                  checked={endCondition === "state"}
+                />
+              </Row>
+
+              <Row />
+              <Row>
+                {endCondition === "state" ? (
                   <Input
-                    name="initialState"
+                    name="endState"
                     type="text"
                     list="states"
-                    value={initialState}
-                    placeholder="Estado Inicial"
+                    value={endState}
+                    placeholder="q3"
+                    label="Estado final"
                     onChange={event => this.handleChange(event)}
                   />
-                </Row>
-
-                <Row>
-                  <Checkbox
-                    radio
-                    label="Aceptar por stack vacio"
-                    value={endCondition}
-                    onClick={() => this.setState({ endCondition: "empty" })}
-                    checked={endCondition === "empty"}
-                  />
-
-                  <Checkbox
-                    radio
-                    label="Aceptar por estado final"
-                    name="endCondition"
-                    value={endCondition}
-                    onClick={() => this.setState({ endCondition: "state" })}
-                    checked={endCondition === "state"}
-                  />
-                </Row>
-
-                {endCondition === "state" ? (
-                  <Row>
-                    <Input
-                      name="endState"
-                      type="text"
-                      list="states"
-                      value={endState}
-                      placeholder="Estado Final"
-                      onChange={event => this.handleChange(event)}
-                    />
-                  </Row>
                 ) : (
                   <Row />
                 )}
+              </Row>
 
-                <Row verticalAlign="middle">
-                  <Input
-                    name="input"
-                    type="text"
-                    value={input}
-                    placeholder="Palabra de entrada"
-                    onChange={event => this.handleChange(event)}
-                    ref={input => (this.word_input = input)}
-                    onKeyPress={event => this.handleKeyPress(event)}
-                    onFocus={() => this.setState({ transition_input_focus: 5 })}
-                  />
-                  <Icon
-                    name="add"
-                    className="iconButton"
-                    onClick={event => {
-                      input
-                        ? this.addWord()
-                        : window.$toast("Ingrese una palabra valida");
-                    }}
-                  />
-                </Row>
-              </Form>
-            </Grid>
+              <Divider />
+
+              <Row>
+                <Input
+                  name="input"
+                  type="text"
+                  value={input}
+                  placeholder="abc"
+                  label="Palabra"
+                  onChange={event => this.handleChange(event)}
+                  ref={input => (this.word_input = input)}
+                  onKeyPress={event => this.handleKeyPress(event)}
+                  onFocus={() => this.setState({ transition_input_focus: 5 })}
+                />
+              </Row>
+              <Row>
+                <Icon
+                  name="plus square outline"
+                  size="big"
+                  className="iconButton"
+                  onClick={event => {
+                    input
+                      ? this.addWord()
+                      : window.$toast("Ingrese una palabra valida");
+                  }}
+                />
+              </Row>
+            </Form>
           </Column>
 
           <Column width={3}>
@@ -399,9 +427,11 @@ export default class App extends Component {
                     {`𝛿(${state}, ${letter}, ${
                       stack_from === "" ? "ε" : stack_from
                     }) = 𝛿(${state_to}, ${stack_to})`}
+                    &nbsp; &nbsp;
                     <Icon
                       name="remove"
                       className="iconButton"
+                      size="normal"
                       onClick={() => {
                         this.removeTransition(key);
                       }}
@@ -412,6 +442,7 @@ export default class App extends Component {
             </List>
           </Column>
         </Grid>
+        <Divider />
 
         <Grid stretched columns={1} centered>
           <List>
@@ -423,7 +454,13 @@ export default class App extends Component {
                   <Item key={key}>
                     {`${word.replace("ε", "")}`}
                     <Icon
-                      name={pending ? "refresh" : accepted ? "check" : "x"}
+                      name={
+                        pending
+                          ? "refresh"
+                          : accepted
+                            ? "checkmark box"
+                            : "remove circle"
+                      }
                       loading={pending}
                     />
                   </Item>
