@@ -187,7 +187,6 @@ export default class App extends Component {
   async updateAutomata() {
     const {
       transitionsList,
-      states,
       initialState,
       endState,
       endCondition
@@ -207,12 +206,7 @@ export default class App extends Component {
     }
 
     if (valid) {
-      const automata = new Automata(
-        transitionsList,
-        states,
-        initialState,
-        endState
-      );
+      const automata = new Automata(transitionsList, initialState, endState);
       await this.setState({
         automata
       });
