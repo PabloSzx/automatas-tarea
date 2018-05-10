@@ -1,6 +1,6 @@
 import Stack from "stackjs";
 import Queue from "queue-fifo";
-import { forEach, merge } from "lodash";
+import { forEach, merge, has } from "lodash";
 
 export default class Automata {
   constructor(
@@ -77,11 +77,9 @@ export default class Automata {
     ) {
       const c = this.word.dequeue();
       if (
-        this.alfabetoDeEntrada[c] &&
-        this.transitions[this.currentState] &&
-        this.transitions[this.currentState][this.stack.peek()] &&
-        this.transitions[this.currentState][this.stack.peek()][c]
-      ) {
+        this.alfabetoDeEntrada[c] && has(this.transitions, [this.currentState, this.stack.peek(), c]) ) {
+
+
         const trans = this.transitions[this.currentState][this.stack.peek()][c];
         const { state_to, stack_to } = trans;
         this.currentState = state_to;
