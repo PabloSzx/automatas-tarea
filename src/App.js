@@ -216,12 +216,10 @@ export default class App extends Component {
       await this.setState({
         automata
       });
-
-      return true;
     } else {
       window.$toast("Verifique los valores de estado inicial y/o final");
     }
-    return false;
+    return valid;
     /* Actualiza el automata con los nuevos datos ingresados, casi tiempo real */
   }
 
@@ -281,7 +279,7 @@ export default class App extends Component {
                   type="text"
                   value={transition_letter}
                   placeholder="a"
-                  label="Letra"
+                  label="Simbolo"
                   onChange={event => this.handleChange(event)}
                   ref={input => (this.transition_letter = input)}
                   onFocus={() => this.setState({ transition_input_focus: 1 })}
