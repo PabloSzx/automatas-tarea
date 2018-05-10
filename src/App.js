@@ -19,20 +19,12 @@ const FormInput = styled.div`
 `;
 
 class Transition {
-  constructor(state, letter, stack_from, state_to, stack_to) {
+  constructor(state, symbol, stack_from, state_to, stack_to) {
     this.state = state;
-    if (letter === "") {
-      this.letter = "ε";
-    } else {
-      this.letter = letter;
-    }
+    this.symbol = symbol === "" ? "ε" : symbol;
     this.stack_from = stack_from;
     this.state_to = state_to;
-    if (stack_to === "") {
-      this.stack_to = "ε";
-    } else {
-      this.stack_to = stack_to;
-    }
+    this.stack_to = stack_to === "" ? "ε" : stack_to;
   }
 }
 
@@ -50,7 +42,7 @@ export default class App extends Component {
 
     this.state = {
       transition_state: "",
-      transition_letter: "",
+      transition_symbol: "",
       transition_stack: "",
       transition_state_to: "",
       transition_stack_to: "",
@@ -67,10 +59,10 @@ export default class App extends Component {
   }
 
   handleKeyPress(event) {
-    if (event.key === "Enter") {
+    if (event.key === "Enter")
       switch (this.state.transition_input_focus) {
         case 0:
-          this.transition_letter.focus();
+          this.transition_symbol.focus();
           return;
         case 1:
           this.transition_stack.focus();
@@ -90,7 +82,6 @@ export default class App extends Component {
         default:
           return;
       }
-    }
   }
 
   async addWord() {
@@ -115,7 +106,7 @@ export default class App extends Component {
   addTransition() {
     const {
       transition_state,
-      transition_letter,
+      transition_symbol,
       transition_stack,
       transition_state_to,
       transition_stack_to,
@@ -126,7 +117,7 @@ export default class App extends Component {
     if (
       transition_state.length >= 1 &&
       transition_state_to.length >= 1 &&
-      transition_letter.length <= 1 &&
+      transition_symbol.length <= 1 &&
       transition_stack.length <= 1
     ) {
       this.setState({
@@ -135,7 +126,7 @@ export default class App extends Component {
           ...transitionsList,
           new Transition(
             transition_state,
-            transition_letter,
+            transition_symbol,
             transition_stack,
             transition_state_to,
             transition_stack_to
@@ -144,12 +135,8 @@ export default class App extends Component {
       });
 
       const trans = {};
-      if (!states[transition_state]) {
-        trans[transition_state] = true;
-      }
-      if (!states[transition_state_to]) {
-        trans[transition_state_to] = true;
-      }
+      trans[transition_state] = true;
+      trans[transition_state_to] = true;
 
       this.setState({
         /* Actualiza el alfabeto de estados (si es necesario), y limpia los input ocupados */
@@ -158,19 +145,16 @@ export default class App extends Component {
           ...trans
         },
         transition_state: "",
-        transition_letter: "",
+        transition_symbol: "",
         transition_stack: "",
         transition_state_to: "",
         transition_stack_to: ""
       });
       this.transition_state.focus(); /* Hacele focus al Estado actual de la nueva transicion */
-
-      this.updateAutomata();
-    } else {
+    } else
       window.$toast(
-        "ERROR! La letra y stack que se esperan, son maximo 1 caracter cada uno"
+        "ERROR! La letra y stack que se esperan, son maximo 1 caracter cada uno y los estados deben tener al menos un caracter"
       );
-    }
   }
 
   removeTransition(index) {
@@ -193,26 +177,20 @@ export default class App extends Component {
     } = this.state;
 
     let valid = false;
-    if (initialState.length >= 1 && endCondition !== "") {
-      //INITIAL STATE TIENE QUE SER MAYOR IGUAL A UNO
+    if (initialState.length >= 1 && endCondition !== "")
       if (endCondition === "state") {
+        //INITIAL STATE TIENE QUE SER MAYOR IGUAL A UNO
         //SI END CONDITION ES DE STATE, TIENE QUE SER MAYOR IGUAL A UNO
-        if (endState.length >= 1) {
-          valid = true;
-        }
-      } else {
-        valid = true;
-      }
-    }
+        if (endState.length >= 1) valid = true;
+      } else valid = true;
 
     if (valid) {
       const automata = new Automata(transitionsList, initialState, endState);
       await this.setState({
         automata
       });
-    } else {
-      window.$toast("Verifique los valores de estado inicial y/o final");
-    }
+    } else window.$toast("Verifique los valores de estado inicial y/o final");
+
     return valid;
     /* Actualiza el automata con los nuevos datos ingresados, casi tiempo real */
   }
@@ -230,7 +208,7 @@ export default class App extends Component {
 
     const {
       transition_state,
-      transition_letter,
+      transition_symbol,
       transition_stack,
       transition_state_to,
       transition_stack_to,
@@ -268,14 +246,14 @@ export default class App extends Component {
                 />
 
                 <Input
-                  name="transition_letter"
+                  name="transition_symbol"
                   className="transition"
                   type="text"
-                  value={transition_letter}
+                  value={transition_symbol}
                   placeholder="a"
-                  label="Simbolo"
+                  label="Símbolo"
                   onChange={event => this.handleChange(event)}
-                  ref={input => (this.transition_letter = input)}
+                  ref={input => (this.transition_symbol = input)}
                   onFocus={() => this.setState({ transition_input_focus: 1 })}
                   onKeyPress={event => this.handleKeyPress(event)}
                 />
@@ -347,7 +325,7 @@ export default class App extends Component {
               <Row>
                 <Checkbox
                   radio
-                  label="Aceptar por stack vacio"
+                  label="Aceptar por stack vacío"
                   value={endCondition}
                   onClick={() => this.setState({ endCondition: "empty" })}
                   checked={endCondition === "empty"}
@@ -413,10 +391,10 @@ export default class App extends Component {
           <Column width={3}>
             <List bulleted>
               {map(transitionsList, (value, key) => {
-                const { state, letter, stack_from, state_to, stack_to } = value;
+                const { state, symbol, stack_from, state_to, stack_to } = value;
                 return (
                   <Item>
-                    {`𝛿(${state}, ${letter}, ${
+                    {`𝛿(${state}, ${symbol}, ${
                       stack_from === "" ? "ε" : stack_from
                     }) = 𝛿(${state_to}, ${stack_to})`}
                     &nbsp; &nbsp;

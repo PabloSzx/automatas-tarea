@@ -5,38 +5,35 @@ import { forEach, merge, has } from "lodash";
 export default class Automata {
   constructor(transitions = [], initialState = "", endState = undefined) {
     this.transitions = {};
-
+    this.word = new Queue();
     this.stack = new Stack();
     this.stack.push("R");
     this.currentState = initialState;
     this.endState = endState;
-    forEach(transitions, (value, key) => {
+    forEach(transitions, value => {
       /* Iteramos sobre la lista de transiciones */
-      const { state, letter, stack_from, state_to, stack_to } = value;
+      const { state, symbol, stack_from, state_to, stack_to } = value;
 
       merge(this.transitions, {
         [state]: {
           /* Se une lo que se tenia antes en transiciones mas la nueva transicion */
           [stack_from]: {
-            [letter]: { state_to, stack_to }
+            [symbol]: { state_to, stack_to }
           }
         }
       });
     });
   }
 
-  reverseString(str) {
-    return str === "" ? "" : this.reverseString(str.substr(1)) + str.charAt(0);
-  }
+  reverse = s => (s === "" ? "" : this.reverse(s.substr(1)) + s.charAt(0));
 
   replaceStack(stack_to) {
     stack_to = stack_to === "ε" ? "" : stack_to;
     this.stack.pop(); /* NECESITO HACER VALIDACION SI EL STACK YA ESTA VACIO??? */
-    for (const c of this.reverseString(stack_to)) this.stack.push(c);
+    for (const c of this.reverse(stack_to)) this.stack.push(c);
   }
 
   analizarPalabra(input) {
-    this.word = new Queue();
     for (const c of input) this.word.enqueue(c);
 
     while (
