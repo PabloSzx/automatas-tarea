@@ -39,7 +39,7 @@ export default class Automata {
     while (
       /* Si existe endState, la condicion del while es si currentState es distinto de endState */
       /* Si no existe endState, la condicion del while es si se acabo la palabra */
-      this.endState ? this.currentState !== this.endState : !this.word.isEmpty()
+      !this.word.isEmpty() && this.endState ? this.currentState !== this.endState : !this.stack.isEmpty()
     ) {
       const c = this.word.dequeue();
       if (has(this.transitions, [this.currentState, this.stack.peek(), c])) {
@@ -54,6 +54,6 @@ export default class Automata {
 
     return this.endState
       ? this.currentState === this.endState
-      : this.stack.isEmpty() || this.stack.peek() === "ε";
+      : this.stack.isEmpty();
   }
 }
