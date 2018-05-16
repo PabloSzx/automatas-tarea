@@ -34,10 +34,9 @@ export default class Automata {
     for (const c of input) this.word.enqueue(c);
 
     while (
-      /* Primero se verifica si queda alguna subpalabra por analizar */
-      /* Despues, Si existe endState, la condicion del while es si currentState es distinto de endState */
+      /* Si existe endState, la condicion del while es si currentState es distinto de endState */
       /* Si no existe endState, la condicion del while es si se acabó el stack */
-      !this.word.isEmpty() && this.endState
+      this.endState
         ? this.currentState !== this.endState
         : !this.stack.isEmpty()
     ) {
