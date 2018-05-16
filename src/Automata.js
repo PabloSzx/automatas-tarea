@@ -1,6 +1,6 @@
 import Stack from "stackjs";
 import Queue from "queue-fifo";
-import { forEach, merge, get } from "lodash";
+import { forEach, merge, get, set } from "lodash";
 
 export default class Automata {
   constructor(transitions = [], initialState = "", endState = undefined) {
@@ -10,19 +10,16 @@ export default class Automata {
     this.stack.push("R");
     this.currentState = initialState;
     this.endState = endState;
-    forEach(transitions, value => {
-      /* Iteramos sobre la lista de transiciones obtenidas de la interfaz */
-      const { state, symbol, stack_from, state_to, stack_to } = value;
-
-      merge(this.transitions, {
-        [state]: {
-          /* Se une lo que se tenia antes en transiciones mas la nueva transicion */
-          [stack_from]: {
-            [symbol]: { state_to, stack_to }
-          }
-        }
-      });
-    });
+    forEach(
+      transitions,
+      ({ state, symbol, stack_from, state_to, stack_to }) => {
+        /* Iteramos sobre la lista de transiciones obtenidas de la interfaz */
+        set(this.transitions, [state, stack_from, symbol], {
+          state_to,
+          stack_to
+        });
+      }
+    );
   }
 
   reverse = s => (s === "" ? "" : this.reverse(s.substr(1)) + s.charAt(0));

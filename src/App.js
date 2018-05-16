@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { map, filter } from "lodash";
+import { map, filter, concat } from "lodash";
 import {
   Grid,
   Form,
@@ -93,10 +93,10 @@ export default class App extends Component {
       this.setState({
         /* Actualiza mi informacion dentro de la pagina y renderiza */
         input: "",
-        inputList: [
-          ...inputList,
+        inputList: concat(
+          inputList,
           new Word(input, false, automata.analizarPalabra(input + "ε"))
-        ]
+        )
       });
 
       this.word_input.focus();
@@ -121,9 +121,8 @@ export default class App extends Component {
       transition_stack.length <= 1
     ) {
       this.setState({
-        transitionsList: [
-          /* La nueva lista de transiciones constara de la lista anterior mas la nueva transicion */
-          ...transitionsList,
+        transitionsList: concat(
+          transitionsList,
           new Transition(
             transition_state,
             transition_symbol,
@@ -131,7 +130,7 @@ export default class App extends Component {
             transition_state_to,
             transition_stack_to
           )
-        ]
+        )
       });
 
       const trans = {};
