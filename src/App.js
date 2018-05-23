@@ -90,13 +90,17 @@ export default class App extends Component {
     if (valid) {
       const { input, automata, inputList } = this.state;
 
+      const accepted = automata.analizarPalabra(input + "ε");
+      if (accepted)
+        window.$toast(`La palabra "${input}" ha sido aceptada por el autómata`);
+      else
+        window.$toast(
+          `La palabra "${input}" ha sido rechazada por el autómata`
+        );
       this.setState({
         /* Actualiza mi informacion dentro de la pagina y renderiza */
         input: "",
-        inputList: concat(
-          inputList,
-          new Word(input, false, automata.analizarPalabra(input + "ε"))
-        )
+        inputList: concat(inputList, new Word(input, false, accepted))
       });
 
       this.word_input.focus();

@@ -51,7 +51,7 @@ export default class Automata {
       const { state_to, stack_to } =
         get(this.transitions, [this.currentState, this.stack.peek(), c]) || {};
       /* Guardamos (si existen) los valores asociadas al estado actual, tope del stack, y caracter a analizar */
-      /* Buscamos en el hash, si no existen, los valores quedan como undefined */
+      /* Buscamos en el hash, y si no existen, los valores quedan como undefined */
 
       if (!state_to || !stack_to) return false;
       /* Si la transicion no está definida, la palabra es rechazada */
