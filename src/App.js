@@ -9,14 +9,7 @@ import {
   Checkbox,
   Divider
 } from "semantic-ui-react";
-import styled from "styled-components";
-
 import Automata from "./Automata";
-
-const FormInput = styled.div`
-  margin-top: 10vh;
-  width: 100vw;
-`;
 
 class Transition {
   constructor(state, symbol, stack_from, state_to, stack_to) {
@@ -224,7 +217,12 @@ export default class App extends Component {
       states
     } = this.state; /* Todas las variables de this.state que nos van a servir en la renderizacion */
     return (
-      <FormInput>
+      <div
+        style={{
+          "margin-top": "10vh",
+          width: "100vw"
+        }}
+      >
         <Divider />
         <datalist id="states">
           {map(states, (value, key) => <option value={key} />)}
@@ -442,7 +440,7 @@ export default class App extends Component {
             })}
           </List>
         </Grid>
-      </FormInput>
+      </div>
     );
   }
 }
